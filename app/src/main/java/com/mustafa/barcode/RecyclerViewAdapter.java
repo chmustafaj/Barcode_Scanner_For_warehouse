@@ -9,8 +9,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.w3c.dom.Text;
-
 import java.util.ArrayList;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder>{
@@ -49,7 +47,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             code=itemView.findViewById(R.id.txtProductCode);
-            desc=itemView.findViewById(R.id.txtProductDescription);
+            desc=itemView.findViewById(R.id.txtShowLoc);
             loc=itemView.findViewById(R.id.txtLoc);
         }
     }

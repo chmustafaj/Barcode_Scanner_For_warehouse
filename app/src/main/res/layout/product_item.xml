@@ -48,7 +48,7 @@
             android:layout_marginRight="30dp"
             android:layout_alignParentEnd="true"
             android:layout_below="@+id/txtProductCode"
-            android:id="@+id/txtProductDescription"/>
+            android:id="@+id/txtShowLoc"/>
         <TextView
             android:textStyle="bold"
             android:layout_width="wrap_content"
@@ -57,14 +57,14 @@
             android:textColor="@color/black"
             android:textSize="20dp"
             android:layout_margin="10dp"
-            android:layout_below="@+id/txtProductDescription"
+            android:layout_below="@+id/txtShowLoc"
             android:id="@+id/txtLocStatic"/>
 
         <TextView
             android:id="@+id/txtLoc"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/txtProductDescription"
+            android:layout_below="@+id/txtShowLoc"
             android:layout_alignParentEnd="true"
             android:layout_marginStart="10dp"
             android:layout_marginTop="10dp"

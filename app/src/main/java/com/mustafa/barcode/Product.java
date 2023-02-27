@@ -3,6 +3,10 @@ package com.mustafa.barcode;
 public class Product {
     private String code, description, location;
 
+    public Product() {
+
+    }
+
     public String getCode() {
         return code;
     }
