@@ -9,12 +9,14 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SettingsActivity extends AppCompatActivity {
     private EditText sheetOrder, sheetProduct, url, edtApiKey;
+    private ArrayList<String> oldConfiguration;
     private Button done;
     public static String SheetUrl;
     public static String orderSheetName;
@@ -25,6 +27,7 @@ public class SettingsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         initViews();
+        displayCurrentValues();
         done.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -32,29 +35,29 @@ public class SettingsActivity extends AppCompatActivity {
                 productSheetName=sheetProduct.getText().toString();
                 orderSheetName=sheetOrder.getText().toString();
                 apiKey=edtApiKey.getText().toString();
-                String sheetID=getSheetIDFromURL(url.getText().toString());
-                Log.d("TAG", "onClick: sheet id "+sheetID);
+                //String sheetID=getSheetIDFromURL(url.getText().toString());
+               // Log.d("TAG", "onClick: sheet id "+sheetID);
                 ArrayList<String> newConfiguration= new ArrayList<>();
-                newConfiguration.add(sheetID);
+                newConfiguration.add(url.getText().toString());
                 newConfiguration.add(orderSheetName);
                 newConfiguration.add(productSheetName);
                 newConfiguration.add(apiKey);
-                Log.d("TAG", "onClick: sheet id "+sheetID);
+                //Log.d("TAG", "onClick: sheet id "+sheetID);
                 startActivity(new Intent(SettingsActivity.this, MainActivity.class));
                 Utils.getInstance(SettingsActivity.this).editConfiguration(newConfiguration);
             }
         });
     }
 
-    private String getSheetIDFromURL(String url) {
-        String regex = "\\/d\\/(.*?)(\\/|$)";
-        Pattern pattern = Pattern.compile(regex);
-        Matcher matcher = pattern.matcher(url);
-        while (matcher.find()) {
-            return (matcher.group(1));
-        }
-        return null;
+    private void displayCurrentValues() {
+        oldConfiguration=Utils.getInstance(SettingsActivity.this).getConfiguration();
+        url.setText(oldConfiguration.get(0));
+        sheetOrder.setText(oldConfiguration.get(1));
+        sheetProduct.setText(oldConfiguration.get(2));
+        edtApiKey.setText(oldConfiguration.get(3));
     }
+
+
 
     void initViews(){
         sheetOrder=findViewById(R.id.edtSheetOrder);

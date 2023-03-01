@@ -2,6 +2,7 @@ package com.mustafa.barcode;
 
 import static android.content.ContentValues.TAG;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -14,6 +15,7 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -31,6 +33,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class OrdersFragment extends Fragment {
@@ -38,7 +42,7 @@ public class OrdersFragment extends Fragment {
     private TextView showTotalQuantity, showNoOfProducts;
     private Button btnSettings, btnNext;
     private ArrayList<Order> orders;
-    private ArrayList<OrdersSheetRow> ordersSheetRows = new ArrayList<>();
+    private final ArrayList<OrdersSheetRow> ordersSheetRows = new ArrayList<>();
     public static Order orderCurrentlyScanning;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -47,6 +51,7 @@ public class OrdersFragment extends Fragment {
         View view= inflater.inflate(R.layout.fragment_orders, container, false);
         orders=new ArrayList<>();
         initViews(view);
+        barcodeText.requestFocus();
         getOrdersFromSheets();
 
         barcodeText.addTextChangedListener(new TextWatcher() {
@@ -85,6 +90,9 @@ public class OrdersFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 barcodeText.setText("");
+                showTotalQuantity.setText("-");
+                showNoOfProducts.setText("-");
+
             }
         });
 
@@ -140,7 +148,7 @@ public class OrdersFragment extends Fragment {
         configuration=Utils.getInstance(getActivity()).getConfiguration();
         Log.d("TAG", "getDataFromAPI: configuratino "+configuration);
         if(configuration!=null && configuration.size()>0){
-            order_spreadsheet_id= configuration.get(0);
+            order_spreadsheet_id= getSheetIDFromURL(configuration.get(0));
             order_tab_name=configuration.get(1);
             api_key=configuration.get(3);
 
@@ -203,7 +211,18 @@ public class OrdersFragment extends Fragment {
         return null;
     }
 
-
-
-
+    @Override
+    public void onResume() {
+        super.onResume();
+        barcodeText.requestFocus();
+    }
+    private String getSheetIDFromURL(String url) {
+        String regex = "\\/d\\/(.*?)(\\/|$)";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(url);
+        while (matcher.find()) {
+            return (matcher.group(1));
+        }
+        return null;
+    }
 }

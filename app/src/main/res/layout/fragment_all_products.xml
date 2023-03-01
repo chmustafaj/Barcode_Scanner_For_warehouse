@@ -17,35 +17,22 @@
         android:singleLine="true"
         android:textSize="25sp" />
 
-    <Button
-        android:id="@+id/btnNext"
-        android:layout_width="match_parent"
-        android:layout_height="70dp"
-        android:layout_below="@id/edtProductBarcode"
-        android:layout_marginStart="20dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="20dp"
-        android:layout_marginBottom="20dp"
-        android:background="@drawable/my_button"
-        android:text="Next"
-        android:textSize="20dp" />
 
 
     <TextView
-        android:layout_below="@+id/btnNext"
+        android:layout_below="@+id/txtShowDesc"
         android:textStyle="bold"
         android:id="@+id/txtProductCodeStatic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
         android:text="Product Code"
         android:textColor="@color/black"
         android:textSize="20dp" />
     <TextView
-        android:layout_below="@+id/btnNext"
+        android:layout_below="@+id/txtShowDesc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textColor="@color/black"
@@ -60,9 +47,8 @@
         android:id="@+id/txtProductDescriptionStatic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/txtShowProductCode"
+        android:layout_below="@+id/txtShowLoc"
         android:layout_marginStart="20dp"
-        android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
         android:layout_marginBottom="10dp"
         android:text="Product Desc"
@@ -78,18 +64,17 @@
         android:layout_marginTop="10dp"
         android:layout_marginRight="20dp"
         android:layout_alignParentEnd="true"
-        android:layout_below="@+id/txtShowProductCode"
+        android:layout_below="@+id/txtShowLoc"
         android:id="@+id/txtShowDesc"/>
 
     <TextView
         android:id="@+id/txtLocStatic"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/txtShowDesc"
+        android:layout_below="@+id/btnNext"
         android:layout_marginStart="20dp"
         android:layout_marginTop="10dp"
         android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
         android:text="Product Location"
         android:textColor="@color/black"
         android:textSize="20dp"
@@ -99,7 +84,7 @@
         android:id="@+id/txtShowLoc"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/txtShowDesc"
+        android:layout_below="@+id/btnNext"
         android:layout_alignParentEnd="true"
         android:layout_marginStart="10dp"
         android:layout_marginTop="10dp"
@@ -107,6 +92,19 @@
         android:layout_marginBottom="10dp"
         android:text="-"
         android:textColor="@color/black"
+        android:textSize="20dp" />
+    <Button
+        android:id="@+id/btnNext"
+        android:layout_width="match_parent"
+        android:layout_height="70dp"
+        android:layout_below="@id/edtProductBarcode"
+        android:layout_margin="20dp"
+        android:layout_marginStart="20dp"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:background="@drawable/my_button"
+        android:text="Next"
         android:textSize="20dp" />
 
 </RelativeLayout>

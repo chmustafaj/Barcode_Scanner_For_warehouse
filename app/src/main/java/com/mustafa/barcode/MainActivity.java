@@ -46,7 +46,7 @@ public class MainActivity extends AppCompatActivity {
         tabLayout.setupWithViewPager(viewPager);
         VPAdapter adapter = new VPAdapter(getSupportFragmentManager(), FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
         adapter.addFragment(new OrdersFragment(), "Orders");
-        adapter.addFragment(new ProductsFragment(), "Products in Order");
+        adapter.addFragment(new ProductsFragment(), "Products");
         adapter.addFragment(new AllProductsFragment(),"All Products");
         viewPager.setAdapter(adapter);
 

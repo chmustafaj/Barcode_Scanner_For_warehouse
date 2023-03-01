@@ -39,16 +39,18 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ProductsFragment extends Fragment {
     EditText edtProductBarcode;
     RelativeLayout layout;
-    Button btnScanNext;
+    private Button btnSkip;
     private ArrayList<Product> products;
     private ArrayList<Product> productsInOrder;
     private Product productCurrentlyScanning;
     private ImageView checkMark;
-    private int noOfProductsToScan, productListIterator;
+    private int noOfProductsToScan, totalNoOfProducts, productListIterator;
     //TabLayout tabLayout;
     ArrayList<Pair<String, Integer>> productList = new ArrayList<>();
     Product p;
@@ -60,10 +62,10 @@ public class ProductsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_products, container, false);
         initViews(view);
+        edtProductBarcode.requestFocus();
         products = new ArrayList<>();
         productsInOrder = new ArrayList<>();
         getProductsFromSheets();
-        ArrayList<Pair<String, Integer>> finalProductList = productList;
         edtProductBarcode.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -75,6 +77,27 @@ public class ProductsFragment extends Fragment {
 
                 p = findProductById(edtProductBarcode.getText().toString());
                 displayProductInfo();
+                if(edtProductBarcode.getText().toString().length()>=12){
+                    if (productCurrentlyScanning.equals(p)) {
+                        if (noOfProductsToScan > 0) {
+                            noOfProductsToScan--;
+                        }
+                        if (noOfProductsToScan >= 1) {
+                            scanProducts(productList.get(productListIterator).first, noOfProductsToScan);
+                        } else {
+                            nextProduct();
+                        }
+                        edtProductBarcode.setText("");
+                    } else {
+                        Toast.makeText(getActivity(), "Wrong Product/Incorrect Quantity Picked", Toast.LENGTH_SHORT).show();
+                        edtProductBarcode.setText("");
+                        edtProductBarcode.requestFocus();
+
+                    }
+                    displayProductInfo();
+                    Log.d(TAG, "onClick: productListIterator " + productListIterator);
+                    Log.d(TAG, "onClick: productListSize " + (productList.size() - 1));
+                }
 
             }
 
@@ -83,66 +106,58 @@ public class ProductsFragment extends Fragment {
 
             }
         });
-        btnScanNext.setOnClickListener(new View.OnClickListener() {
+        btnSkip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (productCurrentlyScanning.equals(p)) {
-                    if (noOfProductsToScan > 0) {
-                        noOfProductsToScan--;
-                    } else {
-                        txtNoOfProductsToScan.setText("Done");
-                    }
-                    if (noOfProductsToScan > 1) {
-                        scanProducts(productList.get(productListIterator).first, noOfProductsToScan);
-                    } else {
-                        if (productListIterator < (productList.size() - 1)) {
-                            productListIterator++;
-                            noOfProductsToScan = productList.get(productListIterator).second;
-                            scanProducts(productList.get(productListIterator).first, productList.get(productListIterator).second);
-                            showCheckMark();
-                        } else {
-                            Snackbar snackbar
-                                    = Snackbar
-                                    .make(
-                                            layout,
-                                            "Order Completed",
-                                            Snackbar.LENGTH_LONG)
-                                    .setAction(
-                                            "Scan Next",
-                                            new View.OnClickListener() {
-                                                @Override
-                                                public void onClick(View view) {
-                                                    MainActivity.selectPage(0);
-                                                }
-                                            });
+               nextProduct();
+               displayProductInfo();
 
-                            snackbar.show();
-
-                        }
-                    }
-                } else {
-                    Toast.makeText(getActivity(), "Wrong Product/Incorrect Quantity Picked", Toast.LENGTH_SHORT).show();
-
-                }
-                displayProductInfo();
-                Log.d(TAG, "onClick: productListIterator " + productListIterator);
-                Log.d(TAG, "onClick: productListSize " + (productList.size() - 1));
             }
         });
         return view;
+    }
+    void nextProduct(){
+        if (productListIterator < (productList.size()-1 )) {
+            productListIterator++;
+            noOfProductsToScan = productList.get(productListIterator).second;
+            totalNoOfProducts=noOfProductsToScan;
+            scanProducts(productList.get(productListIterator).first, productList.get(productListIterator).second);
+            showCheckMark();
+        } else {
+            Snackbar snackbar
+                    = Snackbar
+                    .make(
+                            layout,
+                            "Order Completed",
+                            Snackbar.LENGTH_LONG)
+                    .setAction(
+                            "Scan Next",
+                            new View.OnClickListener() {
+                                @Override
+                                public void onClick(View view) {
+                                    MainActivity.selectPage(0);
+                                }
+                            });
+
+            snackbar.show();
+
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        edtProductBarcode.requestFocus();
+        productListIterator=0;
         Log.d(TAG, "onResume: order currently scanning " + orderCurrentlyScanning);
         if (orderCurrentlyScanning != null) {
             productList = OrdersFragment.orderCurrentlyScanning.getProductList();
             productCurrentlyScanning = findProductById(productList.get(0).first);
             noOfProductsToScan = productList.get(0).second;
+            Log.d(TAG, "onResume: no of products to scan: "+noOfProductsToScan);
+            totalNoOfProducts=noOfProductsToScan;
             displayProductInfo();
             Log.d(TAG, "onResume: product currently scanning " + productCurrentlyScanning);
-
         }
 
     }
@@ -153,7 +168,7 @@ public class ProductsFragment extends Fragment {
     }
 
     private void displayProductInfo() {
-        txtNoOfProductsToScan.setText(Integer.toString(noOfProductsToScan));
+        txtNoOfProductsToScan.setText(noOfProductsToScan +"/"+totalNoOfProducts);
         txtProductLoc.setText(productCurrentlyScanning.getLocation());
         txtProductDesc.setText(productCurrentlyScanning.getDescription());
         txtProductCode.setText(productCurrentlyScanning.getCode());
@@ -162,13 +177,12 @@ public class ProductsFragment extends Fragment {
     void initViews(View view) {
         layout = view.findViewById(R.id.relLayout);
         edtProductBarcode = view.findViewById(R.id.product_barcode);
-        btnScanNext = view.findViewById(R.id.btnNext);
         txtNoOfProductsToScan = view.findViewById(R.id.txtShowNoOfProductsToScan);
         txtProductCode = view.findViewById(R.id.txtShowProductCode);
         txtProductDesc = view.findViewById(R.id.txtShowLoc);
         txtProductLoc = view.findViewById(R.id.txtLoc);
         checkMark=view.findViewById(R.id.checkMark);
-
+        btnSkip=view.findViewById(R.id.btnSkip);
     }
 
     private void getProductsFromSheets() {
@@ -178,7 +192,7 @@ public class ProductsFragment extends Fragment {
         Log.d("TAG", "getDataFromAPI: configuratino " + configuration);
         if (configuration != null && configuration.size() > 0) {
             product_tab_name = configuration.get(2);
-            order_spreadsheet_id = configuration.get(0);
+            order_spreadsheet_id = getSheetIDFromURL(configuration.get(0));
             api_key = configuration.get(3);
             String urlProducts = "https://sheets.googleapis.com/v4/spreadsheets/" +
                     order_spreadsheet_id + "/values/" + product_tab_name +
@@ -255,6 +269,15 @@ public class ProductsFragment extends Fragment {
             if (p.getCode().equals(id)) {
                 return p;
             }
+        }
+        return null;
+    }
+    private String getSheetIDFromURL(String url) {
+        String regex = "\\/d\\/(.*?)(\\/|$)";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(url);
+        while (matcher.find()) {
+            return (matcher.group(1));
         }
         return null;
     }
