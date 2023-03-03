@@ -4,10 +4,13 @@ import static android.content.ContentValues.TAG;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.os.CountDownTimer;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -18,6 +21,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -27,6 +31,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -43,6 +48,7 @@ public class OrdersFragment extends Fragment {
     private Button btnSettings, btnNext;
     private ArrayList<Order> orders;
     private final ArrayList<OrdersSheetRow> ordersSheetRows = new ArrayList<>();
+    private RelativeLayout layout;
     public static Order orderCurrentlyScanning;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -54,6 +60,31 @@ public class OrdersFragment extends Fragment {
         barcodeText.requestFocus();
         getOrdersFromSheets();
 
+        final Handler handler = new Handler();
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                // Your function to run when text has not changed for one second
+                orderCurrentlyScanning = findOrderById(barcodeText.getText().toString());
+                if(orderCurrentlyScanning!=null){
+                    showTotalQuantity.setText(Integer.toString(orderCurrentlyScanning.getTotalQuantity()));
+                    showNoOfProducts.setText(Integer.toString(orderCurrentlyScanning.getNoOfProducts()));
+                    // passing array list to our adapter class.
+                }else{
+                    if(!barcodeText.getText().toString().equals("")){
+                        Snackbar snackbar = Snackbar.make(layout, "Order Does Not Exist!", Snackbar.LENGTH_INDEFINITE).setTextColor(Color.RED).setBackgroundTint(Color.WHITE);
+                        snackbar.setAction("Dismiss", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                snackbar.dismiss();
+                            }
+                        });
+                        snackbar.show();
+                        snackbar.show();
+                    }
+                }
+            }
+        };
         barcodeText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -62,16 +93,15 @@ public class OrdersFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                orderCurrentlyScanning = findOrderById(barcodeText.getText().toString());
-                if(orderCurrentlyScanning!=null){
-                    showTotalQuantity.setText(Integer.toString(orderCurrentlyScanning.getTotalQuantity()));
-                    showNoOfProducts.setText(Integer.toString(orderCurrentlyScanning.getNoOfProducts()));
-                    // passing array list to our adapter class.
-                }else{
-                    if(!barcodeText.getText().toString().equals("")){
-                        Toast.makeText(getActivity(), "Order does not exist!", Toast.LENGTH_SHORT).show();
-                    }
+                if(!barcodeText.getText().toString().equals("")){
+                    handler.removeCallbacks(runnable);
+
+                    // Schedule the runnable to run after 1 second
+                    handler.postDelayed(runnable, 500);
                 }
+                // Reset the handler and cancel any pending runnables
+
+
 
             }
 
@@ -89,14 +119,18 @@ public class OrdersFragment extends Fragment {
         btnNext.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                barcodeText.setText("");
-                showTotalQuantity.setText("-");
-                showNoOfProducts.setText("-");
+                resetOrderScreen();
 
             }
         });
 
         return view;
+    }
+
+    private void resetOrderScreen(){
+        barcodeText.setText("");
+        showTotalQuantity.setText("-");
+        showNoOfProducts.setText("-");
     }
 
     private void initOrders(ArrayList<OrdersSheetRow> rows) {
@@ -139,6 +173,7 @@ public class OrdersFragment extends Fragment {
         showTotalQuantity =v.findViewById(R.id.txtShowQuantity);
         showNoOfProducts=v.findViewById(R.id.txtShowNoOfProducts);
         btnNext=v.findViewById(R.id.btnNext);
+        layout=v.findViewById(R.id.layout);
 
     }
 
@@ -196,8 +231,6 @@ public class OrdersFragment extends Fragment {
             // and passing our json object
             queue.add(jsonObjectRequest);
             // creating a variable for our JSON object request and passing our URL to it.
-
-            //showQuantity.setVisibility(View.VISIBLE);
         }
 
 
@@ -215,6 +248,10 @@ public class OrdersFragment extends Fragment {
     public void onResume() {
         super.onResume();
         barcodeText.requestFocus();
+        if(ProductsFragment.resetOrderScreen){
+            ProductsFragment.resetOrderScreen=false;
+            resetOrderScreen();
+        }
     }
     private String getSheetIDFromURL(String url) {
         String regex = "\\/d\\/(.*?)(\\/|$)";

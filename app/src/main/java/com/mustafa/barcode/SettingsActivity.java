@@ -51,10 +51,21 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void displayCurrentValues() {
         oldConfiguration=Utils.getInstance(SettingsActivity.this).getConfiguration();
-        url.setText(oldConfiguration.get(0));
-        sheetOrder.setText(oldConfiguration.get(1));
-        sheetProduct.setText(oldConfiguration.get(2));
-        edtApiKey.setText(oldConfiguration.get(3));
+        if(oldConfiguration.size()>0){
+            if(oldConfiguration.get(0)!=null){
+                url.setText(oldConfiguration.get(0));
+            }
+            if(oldConfiguration.get(1)!=null){
+                sheetOrder.setText(oldConfiguration.get(1));
+            }
+            if(oldConfiguration.get(2)!=null){
+                sheetProduct.setText(oldConfiguration.get(2));
+            }
+            if(oldConfiguration.get(3)!=null){
+                edtApiKey.setText(oldConfiguration.get(3));
+            }
+        }
+
     }
 
 

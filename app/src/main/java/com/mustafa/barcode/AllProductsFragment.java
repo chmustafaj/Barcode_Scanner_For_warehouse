@@ -1,6 +1,8 @@
 package com.mustafa.barcode;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -9,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -20,6 +23,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.google.android.material.snackbar.Snackbar;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -35,6 +39,7 @@ public class AllProductsFragment extends Fragment {
     TextView txtProductCode, txtProductDesc, txtProductLoc;
     private Button btnNext;
     private ArrayList<Product> products;
+    private RelativeLayout layout;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -45,6 +50,7 @@ public class AllProductsFragment extends Fragment {
         edtProductBarcode.requestFocus();
         products = new ArrayList<>();
         getProductsFromSheets();
+
         edtProductBarcode.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -58,10 +64,18 @@ public class AllProductsFragment extends Fragment {
                     displayProduct(p);
                 } else {
                     if (!edtProductBarcode.getText().toString().equals("")) {
-                        Toast.makeText(getActivity(), "Product Not Found!", Toast.LENGTH_SHORT).show();
+
                         if (edtProductBarcode.getText().toString().length() >= 12) {
                             edtProductBarcode.setText("");
                             edtProductBarcode.requestFocus();
+                            Snackbar snackbar = Snackbar.make(layout, "Product Not Found!", Snackbar.LENGTH_INDEFINITE).setTextColor(Color.RED).setBackgroundTint(Color.WHITE);
+                            snackbar.setAction("Dismiss", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    snackbar.dismiss();
+                                }
+                            });
+                            snackbar.show();
                         }
                     }
                 }
@@ -76,6 +90,9 @@ public class AllProductsFragment extends Fragment {
             public void onClick(View v) {
                 edtProductBarcode.setText("");
                 edtProductBarcode.requestFocus();
+                txtProductCode.setText("-");
+                txtProductDesc.setText("-");
+                txtProductLoc.setText("-");
             }
         });
 
@@ -94,6 +111,7 @@ public class AllProductsFragment extends Fragment {
         txtProductDesc = view.findViewById(R.id.txtShowDesc);
         txtProductLoc = view.findViewById(R.id.txtShowLoc);
         btnNext = view.findViewById(R.id.btnNext);
+        layout=view.findViewById(R.id.layout);
     }
 
     private void getProductsFromSheets() {

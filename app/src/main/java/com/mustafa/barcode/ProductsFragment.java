@@ -3,6 +3,7 @@ package com.mustafa.barcode;
 import static android.content.ContentValues.TAG;
 import static com.mustafa.barcode.OrdersFragment.orderCurrentlyScanning;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.text.Editable;
@@ -43,6 +44,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ProductsFragment extends Fragment {
+    public static boolean resetOrderScreen;
     EditText edtProductBarcode;
     RelativeLayout layout;
     private Button btnSkip;
@@ -71,13 +73,13 @@ public class ProductsFragment extends Fragment {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
             }
-
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-
                 p = findProductById(edtProductBarcode.getText().toString());
-                displayProductInfo();
-                if(edtProductBarcode.getText().toString().length()>=12){
+                if(productCurrentlyScanning!=null){
+                    displayProductInfo();
+
+                if(edtProductBarcode.getText().toString().length()>=12) {
                     if (productCurrentlyScanning.equals(p)) {
                         if (noOfProductsToScan > 0) {
                             noOfProductsToScan--;
@@ -89,12 +91,26 @@ public class ProductsFragment extends Fragment {
                         }
                         edtProductBarcode.setText("");
                     } else {
-                        Toast.makeText(getActivity(), "Wrong Product/Incorrect Quantity Picked", Toast.LENGTH_SHORT).show();
+                        if (!edtProductBarcode.getText().toString().equals("")) {
+                            Snackbar snackbar = Snackbar.make(layout, "Wrong Product/Incorrect Quantity Picked!", Snackbar.LENGTH_INDEFINITE).setTextColor(Color.RED).setBackgroundTint(Color.WHITE);
+                            snackbar.setAction("Dismiss", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    snackbar.dismiss();
+                                }
+                            });
+                            snackbar.show();
+                            snackbar.show();
+                        }
+
                         edtProductBarcode.setText("");
                         edtProductBarcode.requestFocus();
 
                     }
-                    displayProductInfo();
+                    if (productCurrentlyScanning != null) {
+                        displayProductInfo();
+                    }
+                }
                     Log.d(TAG, "onClick: productListIterator " + productListIterator);
                     Log.d(TAG, "onClick: productListSize " + (productList.size() - 1));
                 }
@@ -136,6 +152,7 @@ public class ProductsFragment extends Fragment {
                                 @Override
                                 public void onClick(View view) {
                                     MainActivity.selectPage(0);
+                                    resetOrderScreen=true;
                                 }
                             });
 
