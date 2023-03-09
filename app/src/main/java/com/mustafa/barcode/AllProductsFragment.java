@@ -50,7 +50,30 @@ public class AllProductsFragment extends Fragment {
         edtProductBarcode.requestFocus();
         products = new ArrayList<>();
         getProductsFromSheets();
+        final Handler handler = new Handler();
+        final Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                Product p = findProductById(edtProductBarcode.getText().toString());
+                if (p != null) {
+                    displayProduct(p);
+                } else {
 
+                    if (!edtProductBarcode.getText().toString().equals("")) {
+                        edtProductBarcode.setText("");
+                        edtProductBarcode.requestFocus();
+                        Snackbar snackbar = Snackbar.make(layout, "Product Not Found!", Snackbar.LENGTH_INDEFINITE).setTextColor(Color.RED).setBackgroundTint(Color.WHITE);
+                        snackbar.setAction("Dismiss", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                snackbar.dismiss();
+                            }
+                        });
+                        snackbar.show();
+                    }
+                }
+            }
+        };
         edtProductBarcode.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -59,25 +82,12 @@ public class AllProductsFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                Product p = findProductById(edtProductBarcode.getText().toString());
-                if (p != null) {
-                    displayProduct(p);
-                } else {
-                    if (!edtProductBarcode.getText().toString().equals("")) {
+                if (!edtProductBarcode.getText().toString().equals("")) {
+                    handler.removeCallbacks(runnable);
 
-                        if (edtProductBarcode.getText().toString().length() >= 12) {
-                            edtProductBarcode.setText("");
-                            edtProductBarcode.requestFocus();
-                            Snackbar snackbar = Snackbar.make(layout, "Product Not Found!", Snackbar.LENGTH_INDEFINITE).setTextColor(Color.RED).setBackgroundTint(Color.WHITE);
-                            snackbar.setAction("Dismiss", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    snackbar.dismiss();
-                                }
-                            });
-                            snackbar.show();
-                        }
-                    }
+                    // Schedule the runnable to run after 1 second
+                    handler.postDelayed(runnable, 500);
+
                 }
             }
 
@@ -111,7 +121,7 @@ public class AllProductsFragment extends Fragment {
         txtProductDesc = view.findViewById(R.id.txtShowDesc);
         txtProductLoc = view.findViewById(R.id.txtShowLoc);
         btnNext = view.findViewById(R.id.btnNext);
-        layout=view.findViewById(R.id.layout);
+        layout = view.findViewById(R.id.layout);
     }
 
     private void getProductsFromSheets() {

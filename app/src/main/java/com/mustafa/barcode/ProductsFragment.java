@@ -68,6 +68,50 @@ public class ProductsFragment extends Fragment {
         products = new ArrayList<>();
         productsInOrder = new ArrayList<>();
         getProductsFromSheets();
+        final Handler handler = new Handler();
+        final Runnable runnable=new Runnable() {
+            @Override
+            public void run() {
+                p = findProductById(edtProductBarcode.getText().toString());
+                if(productCurrentlyScanning!=null){
+                    displayProductInfo();
+                        if (productCurrentlyScanning.equals(p)) {
+                            edtProductBarcode.setText("");
+                            if (noOfProductsToScan > 0) {
+                                noOfProductsToScan--;
+                            }
+                            if (noOfProductsToScan >= 1) {
+                                scanProducts(productList.get(productListIterator).first, noOfProductsToScan);
+                            } else {
+                                nextProduct();
+                            }
+                        } else {
+                            if (!edtProductBarcode.getText().toString().equals("")) {
+                                edtProductBarcode.setText("");
+                                Snackbar snackbar = Snackbar.make(layout, "Wrong Product/Incorrect Quantity Picked!", Snackbar.LENGTH_INDEFINITE).setTextColor(Color.RED).setBackgroundTint(Color.WHITE);
+                                snackbar.setAction("Dismiss", new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        snackbar.dismiss();
+                                    }
+                                });
+                                snackbar.show();
+                                snackbar.show();
+                            }
+
+                            edtProductBarcode.setText("");
+                            edtProductBarcode.requestFocus();
+
+                        }
+                        if (productCurrentlyScanning != null) {
+                            displayProductInfo();
+                        }
+
+                    Log.d(TAG, "onClick: productListIterator " + productListIterator);
+                    Log.d(TAG, "onClick: productListSize " + (productList.size() - 1));
+                }
+            }
+        };
         edtProductBarcode.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -75,45 +119,15 @@ public class ProductsFragment extends Fragment {
             }
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                p = findProductById(edtProductBarcode.getText().toString());
-                if(productCurrentlyScanning!=null){
-                    displayProductInfo();
+                if(!edtProductBarcode.getText().toString().equals("")){
+                    handler.removeCallbacks(runnable);
 
-                if(edtProductBarcode.getText().toString().length()>=12) {
-                    if (productCurrentlyScanning.equals(p)) {
-                        if (noOfProductsToScan > 0) {
-                            noOfProductsToScan--;
-                        }
-                        if (noOfProductsToScan >= 1) {
-                            scanProducts(productList.get(productListIterator).first, noOfProductsToScan);
-                        } else {
-                            nextProduct();
-                        }
-                        edtProductBarcode.setText("");
-                    } else {
-                        if (!edtProductBarcode.getText().toString().equals("")) {
-                            Snackbar snackbar = Snackbar.make(layout, "Wrong Product/Incorrect Quantity Picked!", Snackbar.LENGTH_INDEFINITE).setTextColor(Color.RED).setBackgroundTint(Color.WHITE);
-                            snackbar.setAction("Dismiss", new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    snackbar.dismiss();
-                                }
-                            });
-                            snackbar.show();
-                            snackbar.show();
-                        }
+                    // Schedule the runnable to run after 1 second
+                    handler.postDelayed(runnable, 500);
 
-                        edtProductBarcode.setText("");
-                        edtProductBarcode.requestFocus();
-
-                    }
-                    if (productCurrentlyScanning != null) {
-                        displayProductInfo();
-                    }
                 }
-                    Log.d(TAG, "onClick: productListIterator " + productListIterator);
-                    Log.d(TAG, "onClick: productListSize " + (productList.size() - 1));
-                }
+
+                // Reset the handler and cancel any pending runnables
 
             }
 
@@ -173,7 +187,9 @@ public class ProductsFragment extends Fragment {
             noOfProductsToScan = productList.get(0).second;
             Log.d(TAG, "onResume: no of products to scan: "+noOfProductsToScan);
             totalNoOfProducts=noOfProductsToScan;
-            displayProductInfo();
+            if(productCurrentlyScanning!=null){
+                displayProductInfo();
+            }
             Log.d(TAG, "onResume: product currently scanning " + productCurrentlyScanning);
         }
 
