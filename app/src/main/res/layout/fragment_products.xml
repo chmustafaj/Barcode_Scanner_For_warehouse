@@ -145,5 +145,14 @@
         android:layout_margin="30dp"
         android:id="@+id/checkMark"
         android:visibility="gone"/>
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Wipe All"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentBottom="true"
+        android:layout_margin="20dp"
+        android:background="@drawable/my_button"
+        android:id="@+id/btnWipeAllProducts"/>
 
 </RelativeLayout>

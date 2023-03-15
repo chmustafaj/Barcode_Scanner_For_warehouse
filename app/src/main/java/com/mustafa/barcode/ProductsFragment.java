@@ -47,10 +47,10 @@ public class ProductsFragment extends Fragment {
     public static boolean resetOrderScreen;
     EditText edtProductBarcode;
     RelativeLayout layout;
-    private Button btnSkip;
+    private Button btnSkip, btnWipeAll;
     private ArrayList<Product> products;
     private ArrayList<Product> productsInOrder;
-    private Product productCurrentlyScanning;
+    public static Product productCurrentlyScanning;
     private ImageView checkMark;
     private int noOfProductsToScan, totalNoOfProducts, productListIterator;
     //TabLayout tabLayout;
@@ -144,6 +144,16 @@ public class ProductsFragment extends Fragment {
 
             }
         });
+        btnWipeAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resetProductInfo();
+                productCurrentlyScanning=null;
+                orderCurrentlyScanning=null;
+                resetOrderScreen=true;
+
+            }
+        });
         return view;
     }
     void nextProduct(){
@@ -173,6 +183,7 @@ public class ProductsFragment extends Fragment {
             snackbar.show();
 
         }
+
     }
 
     @Override
@@ -191,14 +202,24 @@ public class ProductsFragment extends Fragment {
                 displayProductInfo();
             }
             Log.d(TAG, "onResume: product currently scanning " + productCurrentlyScanning);
+        }else{
+            resetProductInfo();
         }
 
+    }
+    private void resetProductInfo(){
+        txtNoOfProductsToScan.setText("-");
+        txtProductLoc.setText("-");
+        txtProductDesc.setText("-");
+        txtProductCode.setText("-");
+        Log.d(TAG, "resetProductInfo: ");
     }
 
     private void scanProducts(String first, Integer second) {
         productCurrentlyScanning = findProductById(first);
         noOfProductsToScan = second;
     }
+
 
     private void displayProductInfo() {
         txtNoOfProductsToScan.setText(noOfProductsToScan +"/"+totalNoOfProducts);
@@ -216,6 +237,7 @@ public class ProductsFragment extends Fragment {
         txtProductLoc = view.findViewById(R.id.txtLoc);
         checkMark=view.findViewById(R.id.checkMark);
         btnSkip=view.findViewById(R.id.btnSkip);
+        btnWipeAll=view.findViewById(R.id.btnWipeAllProducts);
     }
 
     private void getProductsFromSheets() {

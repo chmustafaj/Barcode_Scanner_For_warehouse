@@ -2,6 +2,7 @@ package com.mustafa.barcode;
 
 import static android.content.ContentValues.TAG;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
@@ -45,11 +46,12 @@ import java.util.regex.Pattern;
 public class OrdersFragment extends Fragment {
     private EditText barcodeText;
     private TextView showTotalQuantity, showNoOfProducts;
-    private Button btnSettings, btnNext;
+    private Button btnSettings, btnNext, btnWipeAll;
     private ArrayList<Order> orders;
     private final ArrayList<OrdersSheetRow> ordersSheetRows = new ArrayList<>();
     private RelativeLayout layout;
     public static Order orderCurrentlyScanning;
+    private boolean ordersInitialized=false;
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -58,10 +60,14 @@ public class OrdersFragment extends Fragment {
         orders=new ArrayList<>();
         initViews(view);
         barcodeText.requestFocus();
+        ordersSheetRows.clear();
         getOrdersFromSheets();
+
+
 
         final Handler handler = new Handler();
         final Runnable runnable = new Runnable() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void run() {
                 // Your function to run when text has not changed for one second
@@ -123,11 +129,18 @@ public class OrdersFragment extends Fragment {
 
             }
         });
+        btnWipeAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                orderCurrentlyScanning=null;
+                resetOrderScreen();
+            }
+        });
 
         return view;
     }
 
-    private void resetOrderScreen(){
+    public void resetOrderScreen(){
         barcodeText.setText("");
         showTotalQuantity.setText("-");
         showNoOfProducts.setText("-");
@@ -146,24 +159,41 @@ public class OrdersFragment extends Fragment {
                 Order order = new Order();
                 int noOfProductsInOrder=0;
                 ArrayList<Pair<String,Integer>> productList = new ArrayList<>();
-                for(OrdersSheetRow ordersSheetRow1:rows){
-                    if(ordersSheetRow.getOrderCode().equals(ordersSheetRow1.getOrderCode())){
-                        noOfProductsInOrder++;
-                        productList.add(new Pair<String, Integer>(ordersSheetRow1.getProductCode(),Integer.parseInt(ordersSheetRow1.getProductQuantity())));
+
+                    for(OrdersSheetRow ordersSheetRow1:rows){
+                        if(ordersSheetRow.getOrderCode().equals(ordersSheetRow1.getOrderCode())){
+                            noOfProductsInOrder++;
+                            productList.add(new Pair<String, Integer>(ordersSheetRow1.getProductCode(),Integer.parseInt(ordersSheetRow1.getProductQuantity())));
+                        }
                     }
-                }
+
+
                 order.setProductList(productList);
                 order.setOrderCode(ordersSheetRow.getOrderCode());
                 order.setNoOfProducts(noOfProductsInOrder);
                 int totalProducts=0;
-                for(Pair<String, Integer> productQuantityPair:productList){
-                    totalProducts=totalProducts+productQuantityPair.second;
-                }
+
+                    for(Pair<String, Integer> productQuantityPair:productList){
+                        totalProducts=totalProducts+productQuantityPair.second;
+                    }
+
+
                 order.setTotalQuantity(totalProducts);
                 orders.add(order);
+                ordersInitialized=true;
             }
 
+
         }
+        btnWipeAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resetOrderScreen();
+                orderCurrentlyScanning=null;
+                barcodeText.setText("");
+
+            }
+        });
 
     }
 
@@ -174,6 +204,7 @@ public class OrdersFragment extends Fragment {
         showNoOfProducts=v.findViewById(R.id.txtShowNoOfProducts);
         btnNext=v.findViewById(R.id.btnNext);
         layout=v.findViewById(R.id.layout);
+        btnWipeAll=v.findViewById(R.id.btnWipeAll);
 
     }
 
@@ -202,6 +233,7 @@ public class OrdersFragment extends Fragment {
                     //loadingPB.setVisibility(View.GONE);
                     try {
                         //JSONObject feedObj = response.getJSONObject("values");
+
                         JSONArray entryArray = response.getJSONArray("values");
                         for(int i=1; i<entryArray.length(); i++){
                             JSONArray row = entryArray.getJSONArray(i);
@@ -212,7 +244,7 @@ public class OrdersFragment extends Fragment {
                             Log.d(TAG, "onResponse: ordersheetrow "+ordersSheetRow);
                             ordersSheetRows.add(ordersSheetRow);
                         }
-                        Log.d(TAG, "onResponse: ordersheet rows"+ordersSheetRows);
+                        Log.d(TAG, "onResponse: ordersheet rows"+ordersSheetRows.size());
                         initOrders(ordersSheetRows);
 
                     } catch (JSONException e) {
@@ -234,6 +266,7 @@ public class OrdersFragment extends Fragment {
         }
 
 
+
     }
     private Order findOrderById(String id) {
         for (Order o :orders){
@@ -252,6 +285,7 @@ public class OrdersFragment extends Fragment {
             ProductsFragment.resetOrderScreen=false;
             resetOrderScreen();
         }
+
     }
     private String getSheetIDFromURL(String url) {
         String regex = "\\/d\\/(.*?)(\\/|$)";

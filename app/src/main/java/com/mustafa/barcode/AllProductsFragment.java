@@ -1,5 +1,7 @@
 package com.mustafa.barcode;
 
+import static com.mustafa.barcode.OrdersFragment.orderCurrentlyScanning;
+
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
@@ -37,7 +39,7 @@ import java.util.regex.Pattern;
 public class AllProductsFragment extends Fragment {
     EditText edtProductBarcode;
     TextView txtProductCode, txtProductDesc, txtProductLoc;
-    private Button btnNext;
+    private Button btnNext, btnWipeAll;
     private ArrayList<Product> products;
     private RelativeLayout layout;
 
@@ -105,6 +107,16 @@ public class AllProductsFragment extends Fragment {
                 txtProductLoc.setText("-");
             }
         });
+        btnWipeAll.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                resetProductInfo();
+                edtProductBarcode.setText("");
+                ProductsFragment.resetOrderScreen=true;
+                ProductsFragment.productCurrentlyScanning=null;
+                OrdersFragment.orderCurrentlyScanning=null;
+            }
+        });
 
         return view;
     }
@@ -114,6 +126,11 @@ public class AllProductsFragment extends Fragment {
         txtProductDesc.setText(p.getDescription());
         txtProductCode.setText(p.getCode());
     }
+    private void resetProductInfo(){
+        txtProductLoc.setText("-");
+        txtProductDesc.setText("-");
+        txtProductCode.setText("-");
+    }
 
     void initViews(View view) {
         edtProductBarcode = view.findViewById(R.id.edtProductBarcode);
@@ -122,6 +139,7 @@ public class AllProductsFragment extends Fragment {
         txtProductLoc = view.findViewById(R.id.txtShowLoc);
         btnNext = view.findViewById(R.id.btnNext);
         layout = view.findViewById(R.id.layout);
+        btnWipeAll=view.findViewById(R.id.btnWipeAllAllProducts);
     }
 
     private void getProductsFromSheets() {
